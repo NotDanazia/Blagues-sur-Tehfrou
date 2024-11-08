@@ -7,7 +7,7 @@
   <script>
     function sendNotification() {
       if (Notification.permission === 'granted') {
-        new Notification('Ceci est une notification');
+        new Notification('Nouvelle mise à jour sur notre site !');
       }
     }
 
@@ -15,11 +15,11 @@
     if (Notification.permission !== 'granted') {
       Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
-          setInterval(sendNotification, 60 * 1000); // 1 minute en millisecondes
+          setInterval(sendNotification, 5 * 1000); // 5 secondes en millisecondes
         }
       });
     } else {
-      setInterval(sendNotification, 60 * 1000); // 1 minute en millisecondes
+      setInterval(sendNotification, 5 * 1000); // 5 secondes en millisecondes
     }
   </script>
 </body>
