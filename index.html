@@ -1,16 +1,26 @@
-function sendNotification() {
-  if (Notification.permission === 'granted') {
-    new Notification('Ceci est une notification');
-  }
-}
-
-// Demander la permission de notification
-if (Notification.permission !== 'granted') {
-  Notification.requestPermission().then(permission => {
-    if (permission === 'granted') {
-      setInterval(sendNotification, 5 * 60 * 1000); // 5 minutes en millisecondes
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Notifications</title>
+</head>
+<body>
+  <script>
+    function sendNotification() {
+      if (Notification.permission === 'granted') {
+        new Notification('Ceci est une notification');
+      }
     }
-  });
-} else {
-  setInterval(sendNotification, 5 * 60 * 1000); // 5 minutes en millisecondes
-}
+
+    // Demander la permission de notification
+    if (Notification.permission !== 'granted') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          setInterval(sendNotification, 60 * 1000); // 1 minute en millisecondes
+        }
+      });
+    } else {
+      setInterval(sendNotification, 60 * 1000); // 1 minute en millisecondes
+    }
+  </script>
+</body>
+</html>
