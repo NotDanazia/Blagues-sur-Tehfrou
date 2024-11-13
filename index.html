@@ -1,54 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-  <title>Virus</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .container {
-      text-align: center;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      color: #333;
-    }
-    p {
-      color: #666;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appuie pour appeler David</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .button {
+            padding: 15px 30px;
+            font-size: 20px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Bienvenue sur notre site !</h1>
-    <p>Activez les notifications pour connaître les mises à jour.</p>
-  </div>
-  <script>
-    function sendNotification() {
-      if (Notification.permission === 'granted') {
-        new Notification('Nouvelle mise à jour sur notre site !');
-      }
-    }
+    <button class="button" onclick="notifyUsers()">Appuie pour appeler David</button>
 
-    // Demander la permission de notification
-    if (Notification.permission !== 'granted') {
-      Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-          setInterval(sendNotification, 1000); // 1 seconde en millisecondes
+    <script>
+        function notifyUsers() {
+            if (Notification.permission === "granted") {
+                new Notification("David vous appelle !");
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        new Notification("David vous appelle !");
+                    }
+                });
+            }
         }
-      });
-    } else {
-      setInterval(sendNotification, 1000); // 1 seconde en millisecondes
-    }
-  </script>
+    </script>
 </body>
 </html>
