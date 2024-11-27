@@ -3,43 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Appuie pour appeler David</title>
+    <title>Coalition de Danzai</title>
     <style>
         body {
+            background-color: white;
+            text-align: center;
             font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
         }
-        .button {
-            padding: 15px 30px;
-            font-size: 20px;
-            color: #fff;
-            background-color: #007bff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        h1 {
+            margin-top: 20%;
+            font-size: 3em;
         }
-        .button:hover {
-            background-color: #0056b3;
+        input[type="password"] {
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 1em;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <button class="button" onclick="notifyUsers()">Appuie pour appeler David</button>
+    <h1>Coalition de Danzai</h1>
+    <input type="password" id="password" placeholder="Entrez le mot de passe">
+    <br>
+    <button onclick="checkPassword()">Valider</button>
 
     <script>
-        function notifyUsers() {
-            if (Notification.permission === "granted") {
-                new Notification("Quelqu'un t'appelle !");
-            } else if (Notification.permission !== "denied") {
-                Notification.requestPermission().then(permission => {
-                    if (permission === "granted") {
-                        new Notification("Quelqu'un t'appelle !");
-                    }
-                });
+        function checkPassword() {
+            var password = document.getElementById("password").value;
+            if (password === "password") {
+                window.location.href = "https://danzai.webnode.fr";
+            } else {
+                window.location.href = "https://youtube.com/@NotDanazia";
             }
         }
     </script>
