@@ -4,16 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Musique en boucle</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .now-playing {
+            font-size: 14px;
+            color: #888;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Bienvenue sur mon site</h1>
-    <audio id="musique" src="https://notdanazia.github.io/Blagues-sur-Tehfrou/musique.mp3" autoplay loop></audio>
+    <div class="container">
+        <div class="now-playing">Now playing</div>
+        <div class="title" id="titre">Musique en boucle</div>
+    </div>
+    <audio id="musique" autoplay></audio>
     <script>
-        // Optionnel : Pour s'assurer que la musique commence dès que la page est chargée
-        window.onload = function() {
-            var musique = document.getElementById('musique');
-            musique.play();
-        };
+        const musiques = [
+            { src: "audio/musique.mp3", titre: "Issam Alnajjar - Hadal Ahbek" },
+            { src: "audio/musique1.mp3", titre: "Betsy, Мария Янковская - Сигма Бой" },
+            { src: "audio/musique2.mp3", titre: "O MELHOR NO QUE FAZ 3.0 - DJ BRYAN 7 ~ (SUPER SLOWED + REVERB)" },
+            { src: "audio/musique3.mp3", titre: "Ogryzek - EMPIRE" },
+            { src: "audio/musique4.mp3", titre: "Ariis - FUNK DO BOUNCE (SLOWED)" },
+            { src: "audio/musique5.mp3", titre: "CRXSHXL - 21 century funk" },
+            { src: "audio/musique6.mp3", titre: "JOYCA - Confinés" },
+            { src: "audio/musique7.mp3", titre: "Farruko - Pepas" },
+            { src: "audio/musique8.mp3", titre: "Madcon - Beggin" },
+            { src: "audio/musique9.mp3", titre: "Hanumankind – Big Dawgs" },
+            { src: "audio/musique10.mp3", titre: "Djo - End Of Beginning" }
+        ];
+
+        let index = 0;
+        const audioElement = document.getElementById('musique');
+        const titreElement = document.getElementById('titre');
+
+        function jouerMusique() {
+            audioElement.src = musiques[index].src;
+            titreElement.textContent = musiques[index].titre;
+            document.title = musiques[index].titre;
+            audioElement.play();
+        }
+
+        audioElement.addEventListener('ended', () => {
+            index = (index + 1) % musiques.length;
+            jouerMusique();
+        });
+
+        window.onload = jouerMusique;
     </script>
 </body>
 </html>
