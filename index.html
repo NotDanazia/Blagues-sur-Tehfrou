@@ -84,13 +84,30 @@
         scoreElement.textContent = 'Score: ' + score;
         point.remove();
       });
+
+      point.isRemoved = false; // Ajout d'une propriété pour suivre l'état de suppression
       requestAnimationFrame(movePoint);
+    }
+
+    function checkCollision() {
+      const points = document.getElementsByClassName('point');
+      for (const point of points) {
+        const currentTop = parseFloat(point.style.top);
+        if (!point.isRemoved && currentTop + point.clientHeight > gameContainer.clientHeight) {
+          alert('Game Over! Votre score est : ' + score);
+          location.reload();
+        }
+      }
     }
 
     setInterval(() => {
       createPoint();
       if (interval > 500) interval -= 50; // Les points apparaissent de plus en plus vite
     }, interval);
+
+    setInterval(() => {
+      checkCollision();
+    }, 50); // Vérifie les collisions toutes les 50ms
   </script>
 </body>
 </html>
