@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Jeu des Points Noirs</title>
+  <title>Afrika No Dako</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -54,7 +54,8 @@
     const waterY = gameContainer.clientHeight - 84; // Ajuste la position du centre du jeu
 
     let score = 0;
-    let interval = 2000;
+    let baseInterval = 2000;
+    const minInterval = 300; // Définir l'intervalle minimum à 300 ms
 
     function createPoint() {
       const point = document.createElement('div');
@@ -89,9 +90,28 @@
         scoreElement.textContent = 'Score: ' + score;
         point.isRemoved = true; // Marquer le point comme supprimé
         point.remove();
+        adjustInterval(); // Ajuster l'intervalle après chaque clic
       });
 
       requestAnimationFrame(movePoint);
+    }
+
+    function adjustInterval() {
+      let newInterval = baseInterval / Math.pow(1.05, score); // Réduction exponentielle de l'intervalle
+      if (newInterval < minInterval) newInterval = minInterval; // Ne pas descendre en dessous du minimum
+      clearInterval(intervalId);
+      intervalId = setInterval(spawnPoints, newInterval); // Appliquer le nouvel intervalle
+    }
+
+    function spawnPoints() {
+      const chance = Math.random();
+      if (chance < 0.01) {
+        createPoint(); createPoint(); createPoint(); // 1 % de chances que 3 points apparaissent
+      } else if (chance < 0.30) {
+        createPoint(); createPoint(); // 29 % de chances que 2 points apparaissent
+      } else {
+        createPoint(); // 70 % de chances que 1 point apparaisse
+      }
     }
 
     function checkCollision() {
@@ -105,14 +125,9 @@
       }
     }
 
-    setInterval(() => {
-      createPoint();
-      if (interval > 500) interval -= 50; // Les points apparaissent de plus en plus vite
-    }, interval);
+    let intervalId = setInterval(spawnPoints, baseInterval);
 
-    setInterval(() => {
-      checkCollision();
-    }, 50); // Vérifie les collisions toutes les 50ms
+    setInterval(checkCollision, 50); // Vérifie les collisions toutes les 50ms
   </script>
 </body>
 </html>
