@@ -68,6 +68,10 @@
 
     // Récupérer le meilleur score stocké dans le localStorage
     let bestScore = localStorage.getItem('bestScore') || 0;
+    if (isNaN(bestScore)) {
+      bestScore = 0; // Initialiser correctement si le score est incorrect
+      localStorage.setItem('bestScore', bestScore);
+    }
     bestScoreElement.textContent = `Meilleur score: ${bestScore}`;
 
     function getMaxPointsOnScreen() {
@@ -94,13 +98,13 @@
           const currentLeft = parseFloat(point.style.left);
 
           if (currentTop + speed > gameContainer.clientHeight) {
-            alert(`Game Over! Votre score est : ${score}`);
             if (score > bestScore) {
               bestScore = score;
               localStorage.setItem('bestScore', bestScore);
               bestScoreElement.textContent = `Meilleur score: ${bestScore}`;
               alert('Nouveau meilleur score!');
             }
+            alert(`Game Over! Votre score est : ${score}`);
             location.reload();
           } else {
             point.style.top = currentTop + speed + 'px';
@@ -128,14 +132,20 @@
     }
 
     function spawnPoints() {
-      const additionalProb = Math.floor(score / 10) * 0.01; // Augmentation de la probabilité pour 3 points pour chaque tranche de 10 points
-      const chance = Math.random();
-      if (chance < 0.01 + additionalProb) {
-        createPoint(); createPoint(); createPoint(); // Probabilité d'apparition de 3 points
-      } else if (chance < 0.30 + additionalProb) {
-        createPoint(); createPoint(); // Probabilité d'apparition de 2 points
-      } else {
-        createPoint(); // Probabilité d'apparition de 1 point
+      const currentPoints = document.getElementsByClassName('point').length;
+      const maxPoints = getMaxPointsOnScreen();
+      const pointsToCreate = maxPoints - currentPoints;
+
+      for (let i = 0; i < pointsToCreate; i++) {
+        const additionalProb = Math.floor(score / 10) * 0.01; // Augmentation de la probabilité pour 3 points pour chaque tranche de 10 points
+        const chance = Math.random();
+        if (chance < 0.01 + additionalProb) {
+          createPoint(); createPoint(); createPoint(); // Probabilité d'apparition de 3 points
+        } else if (chance < 0.30 + additionalProb) {
+          createPoint(); createPoint(); // Probabilité d'apparition de 2 points
+        } else {
+          createPoint(); // Probabilité d'apparition de 1 point
+        }
       }
     }
 
@@ -144,13 +154,13 @@
       for (const point of points) {
         const currentTop = parseFloat(point.style.top);
         if (!point.isRemoved && currentTop + point.clientHeight > gameContainer.clientHeight) {
-          alert(`Game Over! Votre score est : ${score}`);
           if (score > bestScore) {
             bestScore = score;
             localStorage.setItem('bestScore', bestScore);
             bestScoreElement.textContent = `Meilleur score: ${bestScore}`;
             alert('Nouveau meilleur score!');
           }
+          alert(`Game Over! Votre score est : ${score}`);
           location.reload();
         }
       }
