@@ -57,44 +57,47 @@
     let baseInterval = 2000;
     const minInterval = 300; // Définir l'intervalle minimum à 300 ms
     const intervalDecayRate = 0.95; // Facteur de réduction de l'intervalle
+    const maxPointsOnScreen = 10; // Limite stricte du nombre de points à l'écran
 
     function createPoint() {
-      const point = document.createElement('div');
-      point.classList.add('point');
-      point.style.top = '0px';
-      point.style.left = Math.random() * (gameContainer.clientWidth - 160) + 'px';
-      gameContainer.appendChild(point);
+      if (document.getElementsByClassName('point').length < maxPointsOnScreen) {
+        const point = document.createElement('div');
+        point.classList.add('point');
+        point.style.top = '0px';
+        point.style.left = Math.random() * (gameContainer.clientWidth - 160) + 'px';
+        gameContainer.appendChild(point);
 
-      let speed = Math.random() * 3 + 2;
-      let directionX = (waterX - parseFloat(point.style.left)) / (gameContainer.clientHeight / speed);
-      
-      point.isRemoved = false; // Ajout d'une propriété pour suivre l'état de suppression
-
-      function movePoint() {
-        if (point.isRemoved) return; // Ne pas continuer si le point est supprimé
+        let speed = Math.random() * 3 + 2;
+        let directionX = (waterX - parseFloat(point.style.left)) / (gameContainer.clientHeight / speed);
         
-        const currentTop = parseFloat(point.style.top);
-        const currentLeft = parseFloat(point.style.left);
+        point.isRemoved = false; // Ajout d'une propriété pour suivre l'état de suppression
 
-        if (currentTop + speed > gameContainer.clientHeight) {
-          alert('Game Over! Votre score est : ' + score);
-          location.reload();
-        } else {
-          point.style.top = currentTop + speed + 'px';
-          point.style.left = currentLeft + directionX + 'px';
-          requestAnimationFrame(movePoint);
+        function movePoint() {
+          if (point.isRemoved) return; // Ne pas continuer si le point est supprimé
+          
+          const currentTop = parseFloat(point.style.top);
+          const currentLeft = parseFloat(point.style.left);
+
+          if (currentTop + speed > gameContainer.clientHeight) {
+            alert('Game Over! Votre score est : ' + score);
+            location.reload();
+          } else {
+            point.style.top = currentTop + speed + 'px';
+            point.style.left = currentLeft + directionX + 'px';
+            requestAnimationFrame(movePoint);
+          }
         }
+
+        point.addEventListener('click', () => {
+          score++;
+          scoreElement.textContent = 'Score: ' + score;
+          point.isRemoved = true; // Marquer le point comme supprimé
+          point.remove();
+          adjustInterval(); // Ajuster l'intervalle après chaque clic
+        });
+
+        requestAnimationFrame(movePoint);
       }
-
-      point.addEventListener('click', () => {
-        score++;
-        scoreElement.textContent = 'Score: ' + score;
-        point.isRemoved = true; // Marquer le point comme supprimé
-        point.remove();
-        adjustInterval(); // Ajuster l'intervalle après chaque clic
-      });
-
-      requestAnimationFrame(movePoint);
     }
 
     function adjustInterval() {
@@ -126,14 +129,7 @@
       }
     }
 
-    function validateSpawn() {
-      const maxPoints = 3 + Math.floor(score / 10); // Limite le nombre maximal de points à l'écran en fonction du score
-      if (document.getElementsByClassName('point').length < maxPoints) {
-        spawnPoints();
-      }
-    }
-
-    let intervalId = setInterval(validateSpawn, baseInterval);
+    let intervalId = setInterval(spawnPoints, baseInterval);
 
     setInterval(checkCollision, 50); // Vérifie les collisions toutes les 50ms
   </script>
