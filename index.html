@@ -56,6 +56,7 @@
     let score = 0;
     let baseInterval = 2000;
     const minInterval = 300; // Définir l'intervalle minimum à 300 ms
+    const intervalDecayRate = 0.95; // Facteur de réduction de l'intervalle
 
     function createPoint() {
       const point = document.createElement('div');
@@ -97,20 +98,20 @@
     }
 
     function adjustInterval() {
-      let newInterval = baseInterval / Math.pow(1.05, score); // Réduction exponentielle de l'intervalle
-      if (newInterval < minInterval) newInterval = minInterval; // Ne pas descendre en dessous du minimum
+      let newInterval = Math.max(baseInterval * Math.pow(intervalDecayRate, score), minInterval); // Réduction exponentielle de l'intervalle avec un minimum
       clearInterval(intervalId);
       intervalId = setInterval(spawnPoints, newInterval); // Appliquer le nouvel intervalle
     }
 
     function spawnPoints() {
+      const additionalProb = Math.floor(score / 10) * 0.01; // Augmentation de la probabilité pour 3 points pour chaque tranche de 10 points
       const chance = Math.random();
-      if (chance < 0.01) {
-        createPoint(); createPoint(); createPoint(); // 1 % de chances que 3 points apparaissent
-      } else if (chance < 0.30) {
-        createPoint(); createPoint(); // 29 % de chances que 2 points apparaissent
+      if (chance < 0.01 + additionalProb) {
+        createPoint(); createPoint(); createPoint(); // Probabilité d'apparition de 3 points
+      } else if (chance < 0.30 + additionalProb) {
+        createPoint(); createPoint(); // Probabilité d'apparition de 2 points
       } else {
-        createPoint(); // 70 % de chances que 1 point apparaisse
+        createPoint(); // Probabilité d'apparition de 1 point
       }
     }
 
