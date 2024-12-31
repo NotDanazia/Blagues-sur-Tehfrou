@@ -65,10 +65,15 @@
 
       let speed = Math.random() * 3 + 2;
       let directionX = (waterX - parseFloat(point.style.left)) / (gameContainer.clientHeight / speed);
+      
+      point.isRemoved = false; // Ajout d'une propriété pour suivre l'état de suppression
 
       function movePoint() {
+        if (point.isRemoved) return; // Ne pas continuer si le point est supprimé
+        
         const currentTop = parseFloat(point.style.top);
         const currentLeft = parseFloat(point.style.left);
+
         if (currentTop + speed > gameContainer.clientHeight) {
           alert('Game Over! Votre score est : ' + score);
           location.reload();
@@ -82,10 +87,10 @@
       point.addEventListener('click', () => {
         score++;
         scoreElement.textContent = 'Score: ' + score;
+        point.isRemoved = true; // Marquer le point comme supprimé
         point.remove();
       });
 
-      point.isRemoved = false; // Ajout d'une propriété pour suivre l'état de suppression
       requestAnimationFrame(movePoint);
     }
 
