@@ -126,7 +126,14 @@
       }
     }
 
-    let intervalId = setInterval(spawnPoints, baseInterval);
+    function validateSpawn() {
+      const maxPoints = 3 + Math.floor(score / 10); // Limite le nombre maximal de points à l'écran en fonction du score
+      if (document.getElementsByClassName('point').length < maxPoints) {
+        spawnPoints();
+      }
+    }
+
+    let intervalId = setInterval(validateSpawn, baseInterval);
 
     setInterval(checkCollision, 50); // Vérifie les collisions toutes les 50ms
   </script>
