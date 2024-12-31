@@ -1,74 +1,96 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Musique en boucle</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-        .container {
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .now-playing {
-            font-size: 14px;
-            color: #888;
-        }
-        .title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Jeu des Points Noirs</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      overflow: hidden;
+    }
+    #gameContainer {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background-color: lightblue;
+      overflow: hidden;
+    }
+    .point {
+      width: 160px;
+      height: 160px;
+      background-color: black;
+      position: absolute;
+      border-radius: 50%;
+    }
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 36px;
+      font-weight: bold;
+      color: orangered;
+    }
+    #water {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 48px;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="now-playing">Now playing</div>
-        <div class="title" id="titre">Musique en boucle</div>
-    </div>
-    <audio id="musique" autoplay></audio>
-    <script>
-        const musiques = [
-            { src: "https://notdanazia.github.io/Blagues-sur-Tehfrou/musique.mp3", titre: "Issam Alnajjar - Hadal Ahbek" },
-            { src: "https://notdanazia.github.io/Blagues-sur-Tehfrou/musique1.mp3", titre: "Betsy, Мария Янковская - Сигма Бой" },
-            { src: "https://notdanazia.github.io/Blagues-sur-Tehfrou/musique2.mp3", titre: "O MELHOR NO QUE FAZ 3.0 - DJ BRYAN 7 ~ (SUPER SLOWED + REVERB)" },
-            { src: "https://notdanazia.github.io/Blagues-sur-Tehfrou/musique3.mp3", titre: "Ogryzek - EMPIRE" },
-            { src: "https://notdanazia.github.io/Blagues-sur-Tehfrou/musique4.mp3", titre: "Ariis - FUNK DO BOUNCE (SLOWED)" },
-            { src: "https://notdanazia.github.io/Blagues-sur-Tehfrou/musique5.mp3", titre: "CRXSHXL - 21 century funk" },
-            { src: "https://notdanazia.github.io/Blagues-sur-Tehfrou/musique6.mp3", titre: "JOYCA - Confinés" },
-            { src: "https://notdanazia.github.io/Blagues-sur-Tehfrou/musique7.mp3", titre: "Farruko - Pepas" },
-            { src: "https://notdanazia.github.io/Blagues-sur-Tehfrou/musique8.mp3", titre: "Madcon - Beggin" },
-            { src: "https://notdanazia.github.io/Blagues-sur-Tehfrou/musique9.mp3", titre: "Hanumankind – Big Dawgs" },
-            { src: "https://notdanazia.github.io/Blagues-sur-Tehfrou/musique10.mp3", titre: "Djo - End Of Beginning" }
-        ];
+  <div id="gameContainer">
+    <div id="score">Score: 0</div>
+    <div id="water">💦</div>
+  </div>
+  <script>
+    const gameContainer = document.getElementById('gameContainer');
+    const scoreElement = document.getElementById('score');
+    const water = document.getElementById('water');
+    const waterX = gameContainer.clientWidth / 2 - 24; // Ajuste la position du centre du jeu
+    const waterY = gameContainer.clientHeight - 84; // Ajuste la position du centre du jeu
 
-        let index = 0;
-        const audioElement = document.getElementById('musique');
-        const titreElement = document.getElementById('titre');
+    let score = 0;
+    let interval = 2000;
 
-        function jouerMusique() {
-            audioElement.src = musiques[index].src;
-            titreElement.textContent = musiques[index].titre;
-            document.title = musiques[index].titre;
-            audioElement.play();
+    function createPoint() {
+      const point = document.createElement('div');
+      point.classList.add('point');
+      point.style.top = '0px';
+      point.style.left = Math.random() * (gameContainer.clientWidth - 160) + 'px';
+      gameContainer.appendChild(point);
+
+      let speed = Math.random() * 3 + 2;
+      let directionX = (waterX - parseFloat(point.style.left)) / (gameContainer.clientHeight / speed);
+
+      function movePoint() {
+        const currentTop = parseFloat(point.style.top);
+        const currentLeft = parseFloat(point.style.left);
+        if (currentTop + speed > gameContainer.clientHeight) {
+          alert('Game Over! Votre score est : ' + score);
+          location.reload();
+        } else {
+          point.style.top = currentTop + speed + 'px';
+          point.style.left = currentLeft + directionX + 'px';
+          requestAnimationFrame(movePoint);
         }
+      }
 
-        audioElement.addEventListener('ended', () => {
-            index = (index + 1) % musiques.length;
-            jouerMusique();
-        });
+      point.addEventListener('click', () => {
+        score++;
+        scoreElement.textContent = 'Score: ' + score;
+        point.remove();
+      });
+      requestAnimationFrame(movePoint);
+    }
 
-        window.onload = jouerMusique;
-    </script>
+    setInterval(() => {
+      createPoint();
+      if (interval > 500) interval -= 50; // Les points apparaissent de plus en plus vite
+    }, interval);
+  </script>
 </body>
 </html>
