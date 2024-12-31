@@ -39,16 +39,24 @@
       transform: translateX(-50%);
       font-size: 48px;
     }
+    #bestScore {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      font-size: 24px;
+    }
   </style>
 </head>
 <body>
   <div id="gameContainer">
     <div id="score">Score: 0</div>
-    <div id="water">💦</div>
+    <div id="water">💧</div> <!-- Remplacer les gouttelettes par une seule goutte d'eau -->
+    <div id="bestScore">Meilleur score: 0</div>
   </div>
   <script>
     const gameContainer = document.getElementById('gameContainer');
     const scoreElement = document.getElementById('score');
+    const bestScoreElement = document.getElementById('bestScore');
     const water = document.getElementById('water');
     const waterX = gameContainer.clientWidth / 2 - 24; // Ajuste la position du centre du jeu
     const waterY = gameContainer.clientHeight - 84; // Ajuste la position du centre du jeu
@@ -57,10 +65,17 @@
     let baseInterval = 2000;
     const minInterval = 300; // Définir l'intervalle minimum à 300 ms
     const intervalDecayRate = 0.95; // Facteur de réduction de l'intervalle
-    const maxPointsOnScreen = 10; // Limite stricte du nombre de points à l'écran
+
+    // Récupérer le meilleur score stocké dans le localStorage
+    let bestScore = localStorage.getItem('bestScore') || 0;
+    bestScoreElement.textContent = `Meilleur score: ${bestScore}`;
+
+    function getMaxPointsOnScreen() {
+      return Math.floor(score / 10) + 1; // Augmente le nombre max de points affichés de 1 tous les 10 points
+    }
 
     function createPoint() {
-      if (document.getElementsByClassName('point').length < maxPointsOnScreen) {
+      if (document.getElementsByClassName('point').length < getMaxPointsOnScreen()) {
         const point = document.createElement('div');
         point.classList.add('point');
         point.style.top = '0px';
@@ -79,7 +94,13 @@
           const currentLeft = parseFloat(point.style.left);
 
           if (currentTop + speed > gameContainer.clientHeight) {
-            alert('Game Over! Votre score est : ' + score);
+            alert(`Game Over! Votre score est : ${score}`);
+            if (score > bestScore) {
+              bestScore = score;
+              localStorage.setItem('bestScore', bestScore);
+              bestScoreElement.textContent = `Meilleur score: ${bestScore}`;
+              alert('Nouveau meilleur score!');
+            }
             location.reload();
           } else {
             point.style.top = currentTop + speed + 'px';
@@ -90,7 +111,7 @@
 
         point.addEventListener('click', () => {
           score++;
-          scoreElement.textContent = 'Score: ' + score;
+          scoreElement.textContent = `Score: ${score}`;
           point.isRemoved = true; // Marquer le point comme supprimé
           point.remove();
           adjustInterval(); // Ajuster l'intervalle après chaque clic
@@ -123,7 +144,13 @@
       for (const point of points) {
         const currentTop = parseFloat(point.style.top);
         if (!point.isRemoved && currentTop + point.clientHeight > gameContainer.clientHeight) {
-          alert('Game Over! Votre score est : ' + score);
+          alert(`Game Over! Votre score est : ${score}`);
+          if (score > bestScore) {
+            bestScore = score;
+            localStorage.setItem('bestScore', bestScore);
+            bestScoreElement.textContent = `Meilleur score: ${bestScore}`;
+            alert('Nouveau meilleur score!');
+          }
           location.reload();
         }
       }
