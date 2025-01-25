@@ -62,21 +62,28 @@
         </div>
     </div>
     <script>
+        async function getCounts() {
+            const response = await fetch('http://localhost:3000/buttons');
+            const buttons = await response.json();
+            buttons.forEach(button => {
+                document.getElementById(`${button.name}-count`).innerText = button.count;
+            });
+        }
+
+        async function incrementCount(buttonId) {
+            await fetch('http://localhost:3000/increment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: buttonId })
+            });
+            getCounts();
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
-            updateCounts();
+            getCounts();
         });
-
-        function incrementCount(buttonId) {
-            let count = localStorage.getItem(buttonId) || 0;
-            count++;
-            localStorage.setItem(buttonId, count);
-            updateCounts();
-        }
-
-        function updateCounts() {
-            document.getElementById('tehfrou-count').innerText = localStorage.getItem('tehfrou') || 0;
-            document.getElementById('notdanazia-count').innerText = localStorage.getItem('notdanazia') || 0;
-        }
     </script>
 </body>
 </html>
