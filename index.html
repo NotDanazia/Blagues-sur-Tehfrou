@@ -6,7 +6,7 @@
     <title>Jeu Pygame</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pygame.js/0.1.0/pygame.min.js"></script>
 </head>
-<body>
+<body style="background-color: #F5DEB3;">
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <script>
         // Charger les images depuis les URLs
@@ -27,11 +27,17 @@
             const enemyImage = await loadImage("https://3ba8d8ca06.cbaul-cdnwnd.com/ad31ff7aa5568419f0bcf71e9af28d64/200000355-b2009b200a/IMG_0749.webp?ph=3ba8d8ca06");
 
             const player = { x: canvas.width / 2, y: canvas.height / 2, speed: 5 };
-            const enemy = { x: Math.random() * canvas.width, y: Math.random() * canvas.height, speed: 2 };
+            const enemy = { x: 0, y: 0, speed: 2 };
 
             let score = 0;
             let highScore = 0;
             let gameOver = false;
+
+            const walls = [
+                { x: 100, y: 100, width: 200, height: 20 },
+                { x: 400, y: 300, width: 20, height: 200 },
+                { x: 600, y: 150, width: 150, height: 20 }
+            ];
 
             function draw() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -40,6 +46,12 @@
                 ctx.fillStyle = 'white';
                 ctx.font = '24px Arial';
                 ctx.fillText(`Score: ${score}`, 10, 30);
+
+                walls.forEach(wall => {
+                    ctx.fillStyle = 'grey';
+                    ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+                });
+
                 if (gameOver) {
                     ctx.fillText(`Meilleur Score: ${highScore}`, canvas.width / 2 - 100, canvas.height / 2);
                     ctx.fillText('Appuyez sur Entrée pour rejouer', canvas.width / 2 - 150, canvas.height / 2 + 50);
@@ -66,6 +78,15 @@
                         if (score > highScore) highScore = score;
                     }
 
+                    walls.forEach(wall => {
+                        if (player.x < wall.x + wall.width &&
+                            player.x + 50 > wall.x &&
+                            player.y < wall.y + wall.height &&
+                            player.y + 50 > wall.y) {
+                            gameOver = true;
+                        }
+                    });
+
                     score++;
                 }
             }
@@ -84,14 +105,17 @@
                     score = 0;
                     player.x = canvas.width / 2;
                     player.y = canvas.height / 2;
-                    enemy.x = Math.random() * canvas.width;
-                    enemy.y = Math.random() * canvas.height;
+                    enemy.x = Math.random() < 0.5 ? 0 : canvas.width - 50;
+                    enemy.y = Math.random() < 0.5 ? 0 : canvas.height - 50;
                     enemy.speed = 2;
                 }
             });
             window.addEventListener('keyup', (e) => {
                 keys[e.key] = false;
             });
+
+            enemy.x = Math.random() < 0.5 ? 0 : canvas.width - 50;
+            enemy.y = Math.random() < 0.5 ? 0 : canvas.height - 50;
 
             loop();
         }
