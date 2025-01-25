@@ -1,174 +1,127 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Afrika No Dako</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      overflow: hidden;
-    }
-    #gameContainer {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      background-color: lightblue;
-      overflow: hidden;
-    }
-    .point {
-      width: 160px;
-      height: 160px;
-      background-color: black;
-      position: absolute;
-      border-radius: 50%;
-    }
-    #score {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 36px;
-      font-weight: bold;
-      color: orangered;
-    }
-    #water {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 48px;
-    }
-    #bestScore {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      font-size: 24px;
-    }
-  </style>
-</head>
-<body>
-  <div id="gameContainer">
-    <div id="score">Score: 0</div>
-    <div id="water">💧</div> <!-- Remplacer les gouttelettes par une seule goutte d'eau -->
-    <div id="bestScore">Meilleur score: 0</div>
-  </div>
-  <script>
-    const gameContainer = document.getElementById('gameContainer');
-    const scoreElement = document.getElementById('score');
-    const bestScoreElement = document.getElementById('bestScore');
-    const water = document.getElementById('water');
-    const waterX = gameContainer.clientWidth / 2 - 24; // Ajuste la position du centre du jeu
-    const waterY = gameContainer.clientHeight - 84; // Ajuste la position du centre du jeu
+ import pygame
+import random
+import sys
+import requests
+from io import BytesIO
 
-    let score = 0;
-    let baseInterval = 2000;
-    const minInterval = 300; // Définir l'intervalle minimum à 300 ms
-    const intervalDecayRate = 0.95; // Facteur de réduction de l'intervalle
+# Fonction pour charger une image depuis une URL
+def load_image_from_url(url):
+    response = requests.get(url)
+    img = pygame.image.load(BytesIO(response.content))
+    return img
 
-    // Récupérer le meilleur score stocké dans le localStorage
-    let bestScore = localStorage.getItem('bestScore') || 0;
-    if (isNaN(bestScore)) {
-      bestScore = 0; // Initialiser correctement si le score est incorrect
-      localStorage.setItem('bestScore', bestScore);
-    }
-    bestScoreElement.textContent = `Meilleur score: ${bestScore}`;
+# Initialiser Pygame
+pygame.init()
 
-    function getMaxPointsOnScreen() {
-      return Math.floor(score / 10) + 1; // Augmente le nombre max de points affichés de 1 tous les 10 points
-    }
+# Définir les dimensions de la fenêtre
+width, height = 800, 600
+window = pygame.display.set_mode((width, height))
 
-    function createPoint() {
-      if (document.getElementsByClassName('point').length < getMaxPointsOnScreen()) {
-        const point = document.createElement('div');
-        point.classList.add('point');
-        point.style.top = '0px';
-        point.style.left = Math.random() * (gameContainer.clientWidth - 160) + 'px';
-        gameContainer.appendChild(point);
+# Charger les images depuis les URLs
+player_image = load_image_from_url("https://3ba8d8ca06.cbaul-cdnwnd.com/ad31ff7aa5568419f0bcf71e9af28d64/200000013-dc858dc859/700/drapeau%20Danazie%20mini.webp?ph=3ba8d8ca06")
+enemy_image = load_image_from_url("https://3ba8d8ca06.cbaul-cdnwnd.com/ad31ff7aa5568419f0bcf71e9af28d64/200000355-b2009b200a/IMG_0749.webp?ph=3ba8d8ca06")
 
-        let speed = Math.random() * 3 + 2;
-        let directionX = (waterX - parseFloat(point.style.left)) / (gameContainer.clientHeight / speed);
-        
-        point.isRemoved = false; // Ajout d'une propriété pour suivre l'état de suppression
+# Redimensionner les images
+player_image = pygame.transform.scale(player_image, (50, 50))
+enemy_image = pygame.transform.scale(enemy_image, (50, 50))
 
-        function movePoint() {
-          if (point.isRemoved) return; // Ne pas continuer si le point est supprimé
-          
-          const currentTop = parseFloat(point.style.top);
-          const currentLeft = parseFloat(point.style.left);
+# Couleurs
+WHITE = (255, 255, 255)
 
-          if (currentTop + speed > gameContainer.clientHeight) {
-            if (score > bestScore) {
-              bestScore = score;
-              localStorage.setItem('bestScore', bestScore);
-              bestScoreElement.textContent = `Meilleur score: ${bestScore}`;
-              alert('Nouveau meilleur score!');
-            }
-            alert(`Game Over! Votre score est : ${score}`);
-            location.reload();
-          } else {
-            point.style.top = currentTop + speed + 'px';
-            point.style.left = currentLeft + directionX + 'px';
-            requestAnimationFrame(movePoint);
-          }
-        }
+# Vitesse initiale
+player_speed = 5
+enemy_speed = 2
 
-        point.addEventListener('click', () => {
-          score++;
-          scoreElement.textContent = `Score: ${score}`;
-          point.isRemoved = true; // Marquer le point comme supprimé
-          point.remove();
-          adjustInterval(); // Ajuster l'intervalle après chaque clic
-        });
+# Position initiale du joueur et de l'ennemi
+player_pos = [width // 2, height // 2]
+enemy_pos = [random.randint(0, width), random.randint(0, height)]
 
-        requestAnimationFrame(movePoint);
-      }
-    }
+# Score
+score = 0
+font = pygame.font.Font(None, 74)
 
-    function adjustInterval() {
-      let newInterval = Math.max(baseInterval * Math.pow(intervalDecayRate, score), minInterval); // Réduction exponentielle de l'intervalle avec un minimum
-      clearInterval(intervalId);
-      intervalId = setInterval(spawnPoints, newInterval); // Appliquer le nouvel intervalle
-    }
+# Fonction pour afficher le score
+def display_score(score):
+    text = font.render("Score: " + str(score), True, WHITE)
+    window.blit(text, (10, 10))
 
-    function spawnPoints() {
-      const currentPoints = document.getElementsByClassName('point').length;
-      const maxPoints = getMaxPointsOnScreen();
-      const pointsToCreate = maxPoints - currentPoints;
+# Fonction pour gérer l'écran de menu
+def menu_screen(high_score):
+    window.fill((0, 0, 0))
+    text = font.render("Jouer", True, WHITE)
+    high_score_text = font.render("Meilleur Score: " + str(high_score), True, WHITE)
+    window.blit(text, (width // 2 - text.get_width() // 2, height // 2))
+    window.blit(high_score_text, (width // 2 - high_score_text.get_width() // 2, height // 2 + 100))
+    pygame.display.update()
 
-      for (let i = 0; i < pointsToCreate; i++) {
-        const additionalProb = Math.floor(score / 10) * 0.01; // Augmentation de la probabilité pour 3 points pour chaque tranche de 10 points
-        const chance = Math.random();
-        if (chance < 0.01 + additionalProb) {
-          createPoint(); createPoint(); createPoint(); // Probabilité d'apparition de 3 points
-        } else if (chance < 0.30 + additionalProb) {
-          createPoint(); createPoint(); // Probabilité d'apparition de 2 points
-        } else {
-          createPoint(); // Probabilité d'apparition de 1 point
-        }
-      }
-    }
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                waiting = False
 
-    function checkCollision() {
-      const points = document.getElementsByClassName('point');
-      for (const point of points) {
-        const currentTop = parseFloat(point.style.top);
-        if (!point.isRemoved && currentTop + point.clientHeight > gameContainer.clientHeight) {
-          if (score > bestScore) {
-            bestScore = score;
-            localStorage.setItem('bestScore', bestScore);
-            bestScoreElement.textContent = `Meilleur score: ${bestScore}`;
-            alert('Nouveau meilleur score!');
-          }
-          alert(`Game Over! Votre score est : ${score}`);
-          location.reload();
-        }
-      }
-    }
+# Fonction principale du jeu
+def game_loop():
+    global player_pos, enemy_pos, enemy_speed, score
 
-    let intervalId = setInterval(spawnPoints, baseInterval);
+    clock = pygame.time.Clock()
+    running = True
 
-    setInterval(checkCollision, 50); // Vérifie les collisions toutes les 50ms
-  </script>
-</body>
-</html>
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            player_pos[0] -= player_speed
+        if keys[pygame.K_RIGHT]:
+            player_pos[0] += player_speed
+        if keys[pygame.K_UP]:
+            player_pos[1] -= player_speed
+        if keys[pygame.K_DOWN]:
+            player_pos[1] += player_speed
+
+        # Déplacer l'ennemi vers le joueur
+        if enemy_pos[0] < player_pos[0]:
+            enemy_pos[0] += enemy_speed
+        elif enemy_pos[0] > player_pos[0]:
+            enemy_pos[0] -= enemy_speed
+
+        if enemy_pos[1] < player_pos[1]:
+            enemy_pos[1] += enemy_speed
+        elif enemy_pos[1] > player_pos[1]:
+            enemy_pos[1] -= enemy_speed
+
+        # Augmenter la vitesse de l'ennemi
+        enemy_speed += 0.01
+
+        # Vérifier les collisions
+        if pygame.Rect(enemy_pos[0], enemy_pos[1], 50, 50).colliderect(pygame.Rect(player_pos[0], player_pos[1], 50, 50)):
+            running = False
+
+        # Mettre à jour le score
+        score += 1
+
+        # Afficher les éléments
+        window.fill((0, 0, 0))
+        window.blit(player_image, player_pos)
+        window.blit(enemy_image, enemy_pos)
+        display_score(score)
+        pygame.display.update()
+
+        clock.tick(30)
+
+    return score
+
+# Gérer le menu principal
+high_score = 0
+while True:
+    menu_screen(high_score)
+    score = game_loop()
+    if score > high_score:
+        high_score = score
